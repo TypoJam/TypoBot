@@ -62,6 +62,8 @@ async def on_thread_create(thread: discord.Thread):
 	message = await thread.fetch_message(thread.id)
 	await message.pin(reason="First message in thread")
 
+# TODO: This should probably use on_raw_reaction_add, but that requires some more work
+#       https://discordpy.readthedocs.io/en/stable/api.html#discord.on_raw_reaction_add
 @discord_client.event
 async def on_reaction_add(reaction: discord.Reaction, user: (discord.User | discord.Member)):
 	if starboard_channel is None:
