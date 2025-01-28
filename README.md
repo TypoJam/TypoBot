@@ -1,4 +1,4 @@
-# TypoJam Discord bot
+# TypoBot
 
 Discord bot for the TypoJam Discord server.
 
