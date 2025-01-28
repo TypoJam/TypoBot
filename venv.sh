@@ -3,7 +3,7 @@
 VENV_DIR=".venv"
 PYTHON="/usr/bin/env python3"
 REQUIREMENTS="requirements.txt"
-CONFIG_FILE="config.py"
+CONFIG_FILE="bot/config.py"
 
 function activate {
     source $VENV_DIR/bin/activate
