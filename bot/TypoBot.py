@@ -1,4 +1,4 @@
-from discord import TextChannel, app_commands, embeds
+from discord import TextChannel, app_commands
 from storage import Storage
 import config
 import discord
