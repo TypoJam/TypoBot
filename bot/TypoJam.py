@@ -31,6 +31,8 @@ async def on_ready():
 
 	get_starboard_channel(config.STARBOARD_CHANNEL_ID)
 
+	await discord_client.change_presence(activity=discord.Game(name="TypoJam"))
+
 	print(f"Discord client ready.")
 
 # Some error handling so your bot doesn't freeze on 'bot is thinking...'
