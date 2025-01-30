@@ -20,4 +20,4 @@ jobs:
     - name: Analysing the code with mypy
       run: |
         . .venv/bin/activate
-        mypy bot/TypoBot.py
+        mypy .
