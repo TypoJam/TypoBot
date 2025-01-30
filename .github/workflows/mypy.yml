@@ -16,7 +16,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Set up environment
       run: |
-        bash venv.sh
+        bash scripts/venv.sh
     - name: Analysing the code with mypy
       run: |
         . .venv/bin/activate
