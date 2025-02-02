@@ -94,9 +94,8 @@ async def on_reaction_add(reaction: discord.Reaction, _: (discord.User | discord
 
 		await star_message(reaction.message, f"Message reached {config.STARBOARD_MINIMUM_STARS} stars!")
 
-# TODO: This could probably be part of the application menu Discord added
-@command_tree.command(name="force-star", description="Force star a message")
-async def force_star(interaction: discord.Interaction, message_url: str) -> None:
+@command_tree.context_menu(name="Force Star")
+async def force_star(interaction: discord.Interaction, message: discord.Message) -> None:
 	await interaction.response.defer()
 
 	if interaction.guild is None:
@@ -108,29 +107,7 @@ async def force_star(interaction: discord.Interaction, message_url: str) -> None
 		await interaction.followup.send("This command can only be ran by administrators")
 		return
 
-	# https://discord.com/channels/1142838164310999151/1142838261534961816/1335619665602412636
-	parts = message_url.split("/")
-	if len(parts) != 7:
-		await interaction.followup.send(f"The provided message URL (`{message_url}`) does not seem to be a valid Discord message URL")
-		return
-
-	# NOTE: First 4 items are ignored because they're irrelevant
-	#       [ 'https:', '', 'discord.com', 'channels' ]
-	_, _, _, _, guild_id, channel_id, message_id = parts
-	if int(guild_id) != interaction.guild.id:
-		await interaction.followup.send(f"Attempting to star a message from another guild, this is not allowed.")
-		return
-
-	channel = interaction.guild.get_channel(int(channel_id))
-
-	# TODO: This should probably not be forced to be a TextChannel
-	if channel is None or not isinstance(channel, TextChannel):
-		await interaction.followup.send(f"The provided channel (`{channel_id}`) does not seem to be a valid Text Channel")
-		return
-
-	message: discord.Message = await channel.fetch_message(int(message_id))
 	await star_message(message, f"Message was force starred by @{interaction.user.name}")
-
 	await interaction.followup.send(f"Starred message by @{message.author.name}")
 
 discord_client.run(config.DISCORD_TOKEN)
