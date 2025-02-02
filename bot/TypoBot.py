@@ -88,6 +88,9 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
 	if payload.emoji.name != STAR:
 		return
 
+	if payload.message_id in storage.get_starred_messages():
+		return
+
 	channel = bot.get_channel(payload.channel_id)
 	if not isinstance(channel, discord.TextChannel):
 		return
