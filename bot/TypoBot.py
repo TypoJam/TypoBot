@@ -44,6 +44,9 @@ async def command_error(interaction: discord.Interaction, error: app_commands.Ap
 
 @bot.event
 async def on_member_join(member: discord.Member):
+	if not config.JOIN_LEAVE_MESSAGE:
+		return
+
 	if member.guild.system_channel is None:
 		return
 
@@ -51,6 +54,9 @@ async def on_member_join(member: discord.Member):
 
 @bot.event
 async def on_member_remove(member: discord.Member):
+	if not config.JOIN_LEAVE_MESSAGE:
+		return
+
 	if member.guild.system_channel is None:
 		return
 
