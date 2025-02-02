@@ -82,16 +82,22 @@ async def star_message(message: discord.Message, title: str) -> None:
 
 	storage.add_starred_message(message.id)
 
-# TODO: This should probably use on_raw_reaction_add, but that requires some more work
-#       https://discordpy.readthedocs.io/en/stable/api.html#discord.on_raw_reaction_add
 @bot.event
-async def on_reaction_add(reaction: discord.Reaction, _: (discord.User | discord.Member)):
-	if reaction.emoji == "⭐" and reaction.count >= config.STARBOARD_MINIMUM_STARS:
-		if reaction.message.id in storage.get_starred_messages():
-			# Already starred
-			return
+async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+	STAR = "⭐"
+	if payload.emoji.name != STAR:
+		return
 
-		await star_message(reaction.message, f"Message reached {config.STARBOARD_MINIMUM_STARS} stars!")
+	channel = bot.get_channel(payload.channel_id)
+	if not isinstance(channel, discord.TextChannel):
+		return
+
+	message = await channel.fetch_message(payload.message_id)
+	stars = [ r for r in message.reactions if r.emoji ==  STAR].pop().count
+	if stars < config.STARBOARD_MINIMUM_STARS:
+		return
+
+	await star_message(message, f"Message reached {config.STARBOARD_MINIMUM_STARS} stars!")
 
 @command_tree.context_menu(name="Force Star")
 async def force_star(interaction: discord.Interaction, message: discord.Message) -> None:
