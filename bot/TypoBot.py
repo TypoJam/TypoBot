@@ -8,14 +8,14 @@ discord_intents.members = True
 discord_intents.message_content = True
 discord_intents.guilds = True
 
-discord_client = discord.Client(intents=discord_intents)
-command_tree = app_commands.CommandTree(discord_client)
+bot = discord.Client(intents=discord_intents)
+command_tree = app_commands.CommandTree(bot)
 storage = Storage(config.STORAGE_FILE)
 starboard_channel: (discord.TextChannel | None) = None
 
 def get_starboard_channel(channel_id: int):
 	global starboard_channel
-	channel = discord_client.get_channel(channel_id)
+	channel = bot.get_channel(channel_id)
 	if not isinstance(channel, TextChannel):
 		print(f"Channel ID for starboard ({channel_id}) did not return a TextChannel")
 		return
@@ -23,7 +23,7 @@ def get_starboard_channel(channel_id: int):
 	starboard_channel = channel
 	print(f"Starboard channel: #{starboard_channel.name} ({starboard_channel.id})")
 
-@discord_client.event
+@bot.event
 async def on_ready():
 	# TODO: I don't think this is necessary every time but I can't be bothered to figure this out atm
 	print(f"Syncing command tree...")
@@ -31,7 +31,7 @@ async def on_ready():
 
 	get_starboard_channel(config.STARBOARD_CHANNEL_ID)
 
-	await discord_client.change_presence(activity=discord.Game(name="TypoJam"))
+	await bot.change_presence(activity=discord.Game(name="TypoJam"))
 
 	print(f"Discord client ready.")
 
@@ -43,21 +43,21 @@ async def command_error(interaction: discord.Interaction, error: app_commands.Ap
 		f"An error occurred while executing `{interaction.command.name}`:\n```{error}```"
 	)
 
-@discord_client.event
+@bot.event
 async def on_member_join(member: discord.Member):
 	if member.guild.system_channel is None:
 		return
 
 	_ = await member.guild.system_channel.send(f"`{member.id}` {member.mention} Joined!")
 
-@discord_client.event
+@bot.event
 async def on_member_remove(member: discord.Member):
 	if member.guild.system_channel is None:
 		return
 
 	_ = await member.guild.system_channel.send(f"`{member.id}` @{member.name} Left")
 
-@discord_client.event
+@bot.event
 async def on_thread_create(thread: discord.Thread):
 	message = await thread.fetch_message(thread.id)
 	await message.pin(reason="First message in thread")
@@ -85,7 +85,7 @@ async def star_message(message: discord.Message, title: str) -> None:
 
 # TODO: This should probably use on_raw_reaction_add, but that requires some more work
 #       https://discordpy.readthedocs.io/en/stable/api.html#discord.on_raw_reaction_add
-@discord_client.event
+@bot.event
 async def on_reaction_add(reaction: discord.Reaction, _: (discord.User | discord.Member)):
 	if reaction.emoji == "⭐" and reaction.count >= config.STARBOARD_MINIMUM_STARS:
 		if reaction.message.id in storage.get_starred_messages():
@@ -110,4 +110,4 @@ async def force_star(interaction: discord.Interaction, message: discord.Message)
 	await star_message(message, f"Message was force starred by @{interaction.user.name}")
 	await interaction.followup.send(f"Starred message by @{message.author.name}")
 
-discord_client.run(config.DISCORD_TOKEN)
+bot.run(config.DISCORD_TOKEN)
