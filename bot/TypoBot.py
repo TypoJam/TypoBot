@@ -62,32 +62,36 @@ async def on_thread_create(thread: discord.Thread):
 	message = await thread.fetch_message(thread.id)
 	await message.pin(reason="First message in thread")
 
+# TODO: I wanna move all the starboard-related functionality to a seperate file
+async def star_message(message: discord.Message) -> None:
+	if starboard_channel is None:
+		print("Starboard channel is None?")
+		return
+
+	embed = discord.Embed(
+		title=f"Message reached {config.STARBOARD_MINIMUM_STARS} stars!",
+		description=f"[Message Link]({message.jump_url})"
+	)
+
+	if len(message.content) > 0:
+		_ = embed.add_field(name="Content", value=message.content)
+
+	if len(message.attachments) > 0:
+		_ = embed.set_thumbnail(url=message.attachments[0].url)
+
+	_ = await starboard_channel.send(embed=embed)
+
+	storage.add_starred_message(message.id)
+
 # TODO: This should probably use on_raw_reaction_add, but that requires some more work
 #       https://discordpy.readthedocs.io/en/stable/api.html#discord.on_raw_reaction_add
 @discord_client.event
 async def on_reaction_add(reaction: discord.Reaction, user: (discord.User | discord.Member)):
-	if starboard_channel is None:
-		print(f"Starboard channel is None?")
-		return
-
 	if reaction.emoji == "⭐" and reaction.count >= config.STARBOARD_MINIMUM_STARS:
 		if reaction.message.id in storage.get_starred_messages():
 			# Already starred
 			return
 
-		embed = discord.Embed(
-			title=f"Message reached {config.STARBOARD_MINIMUM_STARS} stars!",
-			description=f"[Message Link]({reaction.message.jump_url})"
-		)
-
-		if len(reaction.message.content) > 0:
-			_ = embed.add_field(name="Content", value=reaction.message.content)
-
-		if len(reaction.message.attachments) > 0:
-			_ = embed.set_thumbnail(url=reaction.message.attachments[0].url)
-
-		_ = await starboard_channel.send(embed=embed)
-
-		storage.add_starred_message(reaction.message.id)
+		await star_message(reaction.message)
 
 discord_client.run(config.DISCORD_TOKEN)
