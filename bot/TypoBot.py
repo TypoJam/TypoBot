@@ -1,4 +1,4 @@
-from discord import TextChannel, app_commands
+from discord import app_commands
 from storage import Storage
 import config
 import discord
@@ -16,7 +16,7 @@ starboard_channel: (discord.TextChannel | None) = None
 def get_starboard_channel(channel_id: int):
 	global starboard_channel
 	channel = bot.get_channel(channel_id)
-	if not isinstance(channel, TextChannel):
+	if not isinstance(channel, discord.TextChannel):
 		print(f"Channel ID for starboard ({channel_id}) did not return a TextChannel")
 		return
 
