@@ -94,6 +94,10 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
 	if payload.emoji.name != STAR:
 		return
 
+	assert bot.user is not None # Shut LSP up
+	if payload.user_id == bot.user.id:
+		return
+
 	if payload.message_id in storage.get_starred_messages():
 		return
 
