@@ -35,7 +35,6 @@ async def on_ready():
 
 	print(f"Discord client ready.")
 
-# Some error handling so your bot doesn't freeze on 'bot is thinking...'
 @command_tree.error
 async def command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
 	assert interaction.command is not None
