@@ -73,6 +73,7 @@ async def star_message(message: discord.Message, title: str) -> None:
 		print("Starboard channel is None?")
 		return
 
+	# TODO: Use Discord's forward message feature instead of copying the content
 	embed = discord.Embed(
 		title=title,
 		description=f"[Message Link]({message.jump_url})"
