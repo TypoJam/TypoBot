@@ -76,7 +76,7 @@ async def star_message(message: discord.Message, title: str) -> None:
 	# TODO: Use Discord's forward message feature instead of copying the content
 	embed = discord.Embed(
 		title=title,
-		description=f"[Message Link]({message.jump_url})"
+		description=f"[Message Link]({message.jump_url})\nBy {message.author.mention}"
 	)
 
 	if len(message.content) > 0:
