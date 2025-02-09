@@ -107,7 +107,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
 		return
 
 	message = await channel.fetch_message(payload.message_id)
-	stars = [ r for r in message.reactions if r.emoji ==  STAR].pop().count
+	stars = [ r for r in message.reactions if r.emoji == STAR].pop().count
 	if stars < config.STARBOARD_MINIMUM_STARS:
 		return
 
