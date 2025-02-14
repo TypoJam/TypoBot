@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-BOT_SCRIPT="bot/TypoBot.py"
+BOT_SCRIPT="bot.TypoBot"
 VENV_SCRIPT="scripts/venv.sh"
 
 # Fetch latest changes
@@ -11,4 +11,4 @@ pkill -f "$BOT_SCRIPT"
 
 # Run new (updated) instance
 source "$VENV_SCRIPT"
-nohup python3 "$BOT_SCRIPT" &
+nohup python3 -m "$BOT_SCRIPT" &
