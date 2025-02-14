@@ -61,16 +61,12 @@ class Starboard(commands.Cog):
 
         await self._star_message(message, f"Message reached {config.STARBOARD_MINIMUM_STARS} stars!")
 
+    @app_commands.checks.has_permissions(administrator=True)
     async def force_star(self, interaction: discord.Interaction, message: discord.Message) -> None:
         await interaction.response.defer()
 
         if interaction.guild is None:
             await interaction.followup.send("This command can only be ran in a server")
-            return
-
-        assert isinstance(interaction.user, discord.Member)
-        if not interaction.user.guild_permissions.administrator:
-            await interaction.followup.send("This command can only be ran by administrators")
             return
 
         await self._star_message(message, f"Message was force starred by @{interaction.user.name}")
