@@ -1,6 +1,7 @@
 from discord import app_commands
-from storage import Storage
-import config
+from discord.ext import commands
+from .storage import Storage
+from . import config
 import discord
 
 discord_intents = discord.Intents.default()
@@ -8,8 +9,7 @@ discord_intents.members = True
 discord_intents.message_content = True
 discord_intents.guilds = True
 
-bot = discord.Client(intents=discord_intents)
-command_tree = app_commands.CommandTree(bot)
+bot = commands.Bot(command_prefix="=", intents=discord_intents)
 storage = Storage(config.STORAGE_FILE)
 starboard_channel: (discord.TextChannel | None) = None
 
@@ -27,7 +27,7 @@ def get_starboard_channel(channel_id: int):
 async def on_ready():
 	# TODO: I don't think this is necessary every time but I can't be bothered to figure this out atm
 	print(f"Syncing command tree...")
-	_ = await command_tree.sync()
+	_ = await bot.tree.sync()
 
 	get_starboard_channel(config.STARBOARD_CHANNEL_ID)
 
@@ -35,7 +35,7 @@ async def on_ready():
 
 	print(f"Discord client ready.")
 
-@command_tree.error
+@bot.tree.error
 async def command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
 	assert interaction.command is not None
 	await interaction.followup.send(
