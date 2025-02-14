@@ -7,7 +7,7 @@ VENV_SCRIPT="scripts/venv.sh"
 git pull
 
 # Kill running process
-pkill -f "$BOT_SCRIPT"
+pkill "$BOT_SCRIPT"
 
 # Run new (updated) instance
 source "$VENV_SCRIPT"
