@@ -3,6 +3,7 @@ from discord.ext import commands
 from .storage import Storage
 from . import config
 import discord
+from . import starboard
 
 discord_intents = discord.Intents.default()
 discord_intents.members = True
@@ -11,27 +12,25 @@ discord_intents.guilds = True
 
 bot = commands.Bot(command_prefix="=", intents=discord_intents)
 storage = Storage(config.STORAGE_FILE)
-starboard_channel: (discord.TextChannel | None) = None
 
 def get_starboard_channel(channel_id: int):
-	global starboard_channel
 	channel = bot.get_channel(channel_id)
 	if not isinstance(channel, discord.TextChannel):
 		print(f"Channel ID for starboard ({channel_id}) did not return a TextChannel")
 		return
 
-	starboard_channel = channel
-	print(f"Starboard channel: #{starboard_channel.name} ({starboard_channel.id})")
+	return channel
 
 @bot.event
 async def on_ready():
+	starboard_channel: (discord.TextChannel | None) = get_starboard_channel(config.STARBOARD_CHANNEL_ID)
+	await bot.add_cog(starboard.Starboard(bot, storage, starboard_channel))
+
+	await bot.change_presence(activity=discord.Game(name="TypoJam"))
+
 	# TODO: I don't think this is necessary every time but I can't be bothered to figure this out atm
 	print(f"Syncing command tree...")
 	_ = await bot.tree.sync()
-
-	get_starboard_channel(config.STARBOARD_CHANNEL_ID)
-
-	await bot.change_presence(activity=discord.Game(name="TypoJam"))
 
 	print(f"Discord client ready.")
 
@@ -66,67 +65,5 @@ async def on_member_remove(member: discord.Member):
 async def on_thread_create(thread: discord.Thread):
 	message = await thread.fetch_message(thread.id)
 	await message.pin(reason="First message in thread")
-
-# TODO: I wanna move all the starboard-related functionality to a seperate file
-async def star_message(message: discord.Message, title: str) -> None:
-	if starboard_channel is None:
-		print("Starboard channel is None?")
-		return
-
-	# TODO: Use Discord's forward message feature instead of copying the content
-	embed = discord.Embed(
-		title=title,
-		description=f"[Message Link]({message.jump_url})\nBy {message.author.mention}"
-	)
-
-	if len(message.content) > 0:
-		_ = embed.add_field(name="Content", value=message.content)
-
-	if len(message.attachments) > 0:
-		_ = embed.set_thumbnail(url=message.attachments[0].url)
-
-	_ = await starboard_channel.send(embed=embed)
-
-	storage.add_starred_message(message.id)
-
-@bot.event
-async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
-	STAR = "⭐"
-	if payload.emoji.name != STAR:
-		return
-
-	assert bot.user is not None # Shut LSP up
-	if payload.user_id == bot.user.id:
-		return
-
-	if payload.message_id in storage.get_starred_messages():
-		return
-
-	channel = bot.get_channel(payload.channel_id)
-	if not isinstance(channel, discord.TextChannel):
-		return
-
-	message = await channel.fetch_message(payload.message_id)
-	stars = [ r for r in message.reactions if r.emoji == STAR].pop().count
-	if stars < config.STARBOARD_MINIMUM_STARS:
-		return
-
-	await star_message(message, f"Message reached {config.STARBOARD_MINIMUM_STARS} stars!")
-
-@command_tree.context_menu(name="Force Star")
-async def force_star(interaction: discord.Interaction, message: discord.Message) -> None:
-	await interaction.response.defer()
-
-	if interaction.guild is None:
-		await interaction.followup.send("This command can only be ran in a server")
-		return
-
-	assert isinstance(interaction.user, discord.Member)
-	if not interaction.user.guild_permissions.administrator:
-		await interaction.followup.send("This command can only be ran by administrators")
-		return
-
-	await star_message(message, f"Message was force starred by @{interaction.user.name}")
-	await interaction.followup.send(f"Starred message by @{message.author.name}")
 
 bot.run(config.DISCORD_TOKEN)
