@@ -13,11 +13,11 @@ discord_intents.guilds = True
 bot = commands.Bot(command_prefix="=", intents=discord_intents)
 storage = Storage(config.STORAGE_FILE)
 
-def get_starboard_channel(channel_id: int):
+def get_starboard_channel(channel_id: int) -> (discord.TextChannel | None):
     channel = bot.get_channel(channel_id)
     if not isinstance(channel, discord.TextChannel):
         print(f"Channel ID for starboard ({channel_id}) did not return a TextChannel")
-        return
+        return None
 
     return channel
 
