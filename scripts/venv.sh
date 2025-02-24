@@ -13,7 +13,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
     # Create example config file
     echo "DISCORD_TOKEN = \"token here\"" >> $CONFIG_FILE
     echo "STORAGE_FILE = \"storage.json\"" >> $CONFIG_FILE
-    echo "STARBOARD_CHANNEL_ID = \"0000000000000000000\"" >> $CONFIG_FILE
+    echo "STARBOARD_CHANNEL_ID = 0000000000000000000" >> $CONFIG_FILE
     echo "STARBOARD_MINIMUM_STARS = 5" >> $CONFIG_FILE
     echo "JOIN_LEAVE_MESSAGE = True" >> $CONFIG_FILE
 fi
