@@ -39,12 +39,9 @@ class Starboard(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+
         STAR = "⭐"
         if payload.emoji.name != STAR:
-            return
-
-        assert self.bot.user is not None # Shut LSP up
-        if payload.user_id == self.bot.user.id:
             return
 
         if payload.message_id in self.storage.get_starred_messages():
@@ -55,6 +52,11 @@ class Starboard(commands.Cog):
             return
 
         message = await channel.fetch_message(payload.message_id)
+
+        assert self.bot.user is not None # Shut LSP up
+        if message.author.id == self.bot.user.id:
+            return
+
         stars = [ r for r in message.reactions if r.emoji == STAR].pop().count
         if stars < config.STARBOARD_MINIMUM_STARS:
             return
